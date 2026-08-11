@@ -35,7 +35,7 @@ app.post('/fact-check', async (req, res) => {
       {
         role: 'user',
         content: `Is this claim true, false, or misleading? Explain briefly. Claim: "${claim}"`,
-      },
+      },//Exactly — you've got it. Backticks let JavaScript treat ${...} as "insert whatever this evaluates to, right here," while regular quotes just treat everything literally as plain text with no substitution.
     ],
     model: 'llama-3.3-70b-versatile',
   });
