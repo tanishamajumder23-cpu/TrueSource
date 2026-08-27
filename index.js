@@ -1,50 +1,233 @@
-require('dotenv').config(); // loads the .env so the API key is available here
+require('dotenv').config(); 
+// Loads the .env file into this program.
+// This makes process.env.GROQ_API_KEY and process.env.TAVILY_API_KEY
+// available anywhere in this file. Without this line, both would be undefined.
+
 const express = require('express');
-const Groq = require('groq-sdk'); // Groq's library for talking to the AI
+// Imports the Express library — the tool that lets us build a web server
+// (handle incoming requests, send back responses) without writing raw networking code.
+
+const Groq = require('groq-sdk'); 
+// Imports Groq's official toolbox/library for talking to their AI models easily.
+
+const axios = require('axios');
+// Imports axios — a generic tool for sending HTTP requests to any URL.
+// We use this for Tavily, since Tavily doesn't have its own official library like Groq does.
 
 const app = express();
-const groq = new Groq({ apiKey: process.env.GROQ_API_KEY }); // connects using our secret key
-//loads Groq's toolbox so you can talk to their AI models.
-app.use(express.json()); // lets Express understand JSON data sent to it, This is a middleware — a function that runs on every incoming request before it reaches your routes.
-//Specifically, express.json() looks at incoming requests, and if they contain JSON data (like { "claim": "coffee cures cancer" }), it parses that text into a real JavaScript object and attaches it to req.body. Without this line, req.body would just be undefined, and your /fact-check route couldn't read what was sent.
+// Creates the actual Express application/server object.
+// From now on, "app" represents your entire running server —
+// every route (like app.get, app.post) gets attached to this object.
 
-// Homepage route — just to check the server is alive
-app.get('/', (req, res) => {//When someone visits the homepage (/) using a GET request (which is what browsers do by default when you type a URL), run this function.
-  res.send('Hello from Veristate backend!');//res.send(...) = send back plain text as the reply
-});
-/*
+const groq = new Groq({ apiKey: process.env.GROQ_API_KEY }); 
+// Creates an authenticated connection to Groq, using your secret key from .env.
+// Every time you write groq.chat.completions.create(...), you're using this connection.
 
-// Fact-check route — where claims will be sent
-app.post('/fact-check', async (req, res) => {//when someone sends data (POST) to /fact-check, run this
-   // async lets us await that without freezing the whole server.
-  const { claim } = req.body;//This is called destructuring. If someone sent { "claim": "coffee cures cancer" }, then req.body is that whole object, and this line pulls out just the claim field into its own variable. It's equivalent to writing const claim = req.body.claim;, just shorter.
+app.use(express.json()); 
+// Middleware — code that runs automatically on EVERY incoming request, before your routes handle it.
+// express.json() specifically looks for JSON data in incoming requests
+// (like { "text": "some claim" }) and converts it into a real JavaScript object,
+// attached to req.body. Without this, req.body would be undefined and your routes
+// couldn't read anything the user sent.
 
-  console.log('Received claim:', claim);
 
-  res.json({ message: 'Got your claim!', claim: claim });
-});
-*/
+/* ============================
+   AI / EVIDENCE HELPER FUNCTIONS
+   These three functions do the actual "thinking" work.
+   None of them are routes — they're just reusable pieces
+   that our routes will call later.
+   ============================ */
 
-app.post('/fact-check', async (req, res) => {
-  const { claim } = req.body;
 
-  console.log('Received claim:', claim);
+async function extractClaims(text) {
+  // Takes one input: "text" — the raw paragraph/claim the user submitted.
+  // "async" means this function will pause and wait for a slow network call (to Groq),
+  // without freezing the rest of the program while it waits.
 
   const response = await groq.chat.completions.create({
+    // Sends a request to Groq's chat API and waits ("await") for the reply.
+    // The full reply gets stored in "response".
+
+    messages: [
+      // "messages" is the conversation we're sending to Groq.
+      // It's an array because a real chat could have many back-and-forth messages;
+      // here we only send one.
+      {
+        role: 'user', 
+        // "role: 'user'" means this message is from the human/us,
+        // as opposed to 'assistant' (a previous AI reply) or 'system' (special instructions).
+
+        content: `Extract each distinct factual claim from the following text. Respond ONLY with a JSON array of strings, nothing else - no explanation, no markdown formatting.
+Text: "${text}"`
+        // The actual instruction we're giving Groq, written with backticks (template literal)
+        // so we can insert the "text" variable directly using ${text}.
+        // We explicitly demand ONLY a JSON array back — no extra sentences —
+        // so our code can reliably read the response as real data, not a paragraph.
+      }
+    ],
+
+    model: 'openai/gpt-oss-120b',
+    // Tells Groq which AI model to use for this request.
+    // (The old model name, llama-3.3-70b-versatile, was retired/shut down by Groq.)
+  });
+
+  return JSON.parse(response.choices[0].message.content);
+  // response.choices is an array of possible replies (we only asked for one, so [0]).
+  // .message.content is where the actual text Groq wrote lives — 
+  // at this point it's just a STRING that looks like JSON, e.g. '["claim1","claim2"]'.
+  // JSON.parse(...) converts that string into a REAL JavaScript array we can use in code.
+  // "return" sends this array back to whatever code called extractClaims(...).
+}
+
+
+async function getEvidence(claim) {
+  // Takes one input: "claim" — a single claim string (one item from the array above).
+
+  const tavilyResponse = await axios.post('https://api.tavily.com/search', {
+    // Sends a POST request to Tavily's search endpoint and waits for the reply.
+    // First argument = the URL we're sending to.
+    // Second argument = the data we're sending, described below.
+
+    api_key: process.env.TAVILY_API_KEY,
+    // Our secret Tavily key, proving to Tavily that this request is really from us.
+
+    query: claim,
+    // The actual search query — here, we're searching for evidence about this specific claim.
+
+    max_results: 3
+    // Limits Tavily to sending back only the top 3 most relevant results,
+    // so we don't get overwhelmed with data.
+  });
+
+  return tavilyResponse.data.results;
+  // tavilyResponse is the full reply object (status codes, headers, etc — we don't need all of that).
+  // tavilyResponse.data is the actual content Tavily sent back.
+  // .results is specifically the array of search result objects
+  // (each with title, content, url, score) — this is our "evidence."
+  // We return just this array, since that's the only part we actually need.
+}
+
+
+async function getVerdict(claim, evidence) {
+  // Takes TWO inputs: the claim (string) and the evidence (array of result objects from Tavily).
+
+  const evidenceText = evidence
+    .map((e, i) => `Source ${i + 1} (${e.url}): ${e.content}`)
+    .join('\n\n');
+  // evidence.map(...) goes through each evidence object one at a time.
+  // For each one (called "e", with its position in the array called "i"),
+  // it builds a readable line like: "Source 1 (https://example.com): some snippet text"
+  // .join('\n\n') then glues all these individual lines together into ONE big block of text,
+  // with a blank line between each source, so it reads clearly.
+  // We need this because Tavily gives us structured DATA (objects),
+  // but our next Groq prompt needs plain readable TEXT.
+
+  const response = await groq.chat.completions.create({
+    // Same idea as extractClaims — send a request to Groq, wait for the reply.
+
     messages: [
       {
         role: 'user',
-        content: `Is this claim true, false, or misleading? Explain briefly. Claim: "${claim}"`,
-      },//Exactly — you've got it. Backticks let JavaScript treat ${...} as "insert whatever this evaluates to, right here," while regular quotes just treat everything literally as plain text with no substitution.
+        content: `You are a fact-checker. Given a claim and evidence from real sources, determine a verdict.
+
+Claim: "${claim}"
+
+Evidence:
+${evidenceText}
+
+Respond ONLY with a JSON object in this exact format, nothing else:
+{
+  "verdict": "TRUE" | "FALSE" | "MISLEADING" | "UNVERIFIABLE",
+  "confidence": 0-100,
+  "reasoning": "a 1-2 sentence explanation",
+  "sources": ["url1", "url2"]
+}`
+        // This prompt gives Groq THREE things: 
+        // 1) the claim itself, 2) the real evidence we gathered, and 
+        // 3) a strict JSON format to respond in (an OBJECT this time, not just an array,
+        // because we need multiple labeled fields back: verdict, confidence, reasoning, sources).
+      }
     ],
-    model: 'llama-3.3-70b-versatile',
+    model: 'openai/gpt-oss-120b',
   });
 
-  const verdict = response.choices[0].message.content;
+  return JSON.parse(response.choices[0].message.content);
+  // Same as before — convert Groq's text reply (a JSON-shaped string)
+  // into a real JavaScript object we can actually use, then return it.
+}
 
-  res.json({ claim: claim, verdict: verdict });
+
+/* ============================
+   ROUTES
+   These are the actual "doors" into your server —
+   the URLs that the frontend (or Postman/curl) will send requests to.
+   ============================ */
+
+
+app.get('/', (req, res) => {
+  // Defines what happens when someone visits the homepage ("/") using a GET request
+  // (GET = what browsers normally do when you type a URL and hit enter).
+  // "req" = information about the incoming request (not used here).
+  // "res" = the tool we use to send a response back.
+
+  res.send('Hello from Veristate backend!');
+  // Sends back plain text — just a simple way to confirm the server is alive and reachable.
 });
-// Starts the server
+
+
+app.post('/api/analyze', async (req, res) => {
+  // Defines what happens when someone sends a POST request (submits data) to /api/analyze.
+  // This is the MAIN route — the real brain of Veristate.
+  // "async" because this route will call several slow functions (Groq, Tavily) and must wait for them.
+
+  const { text } = req.body;
+  // Destructuring: req.body is the JSON data the frontend sent, e.g. { "text": "some paragraph" }.
+  // This line pulls out just the "text" field into its own variable.
+  // Equivalent to writing: const text = req.body.text;
+
+  console.log('Received text:', text);
+  // Prints the incoming text to your terminal — useful for debugging,
+  // so you can see exactly what the server received while testing.
+
+  const claims = await extractClaims(text);
+  // Calls our first helper function: turns the raw text into an array of individual claims.
+  // "await" pauses here until extractClaims fully finishes and returns its array.
+
+  const results = [];
+  // Creates an empty array. We'll fill this with one verdict object per claim,
+  // as we loop through them below.
+
+  for (const claim of claims) {
+    // A "for...of" loop: goes through the "claims" array one item at a time.
+    // On each pass, the current claim (a single string) is stored in the variable "claim".
+    // Everything inside these { } runs once PER claim.
+
+    const evidence = await getEvidence(claim);
+    // For this specific claim, fetch real evidence from Tavily.
+
+    const verdict = await getVerdict(claim, evidence);
+    // Using this claim AND its evidence, ask Groq for a structured verdict.
+
+    results.push({ claim, ...verdict });
+    // Adds a new object to the "results" array.
+    // { claim, ...verdict } combines the claim text with every field inside "verdict"
+    // (verdict, confidence, reasoning, sources) into one flat object — 
+    // e.g. { claim: "...", verdict: "TRUE", confidence: 90, reasoning: "...", sources: [...] }.
+    // The "..." here is called the spread operator — it unpacks verdict's fields
+    // directly into this new object, instead of nesting it inside a sub-object.
+  }
+  // Once the loop has gone through every single claim, we exit here.
+
+  res.json({ results });
+  // Sends the entire results array back to whoever called this route (the frontend, or Postman),
+  // formatted as JSON: { "results": [ {...}, {...} ] }
+});
+
+
 app.listen(3000, () => {
+  // Starts the server, telling it to listen for incoming requests on port 3000
+  // (so your server is reachable at http://localhost:3000 while running locally).
+
   console.log('Server running on http://localhost:3000');
+  // Prints a confirmation message to your terminal once the server successfully starts.
 });
