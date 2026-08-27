@@ -1,5 +1,5 @@
 require ('dotenv').config();
-/*What require means: in Node.js, your code doesn't 
+/* What require means: in Node.js, your code doesn't 
 automatically know about outside tools/libraries. 
 require('something') is how you say "hey, go fetch 
 that tool and let me use it in this file." 
