@@ -2,6 +2,7 @@ require('dotenv').config();
 // Loads the .env file into this program.
 // This makes process.env.GROQ_API_KEY and process.env.TAVILY_API_KEY
 // available anywhere in this file. Without this line, both would be undefined.
+const cors = require('cors');
 
 const express = require('express');
 // Imports the Express library — the tool that lets us build a web server
@@ -18,7 +19,7 @@ const app = express();
 // Creates the actual Express application/server object.
 // From now on, "app" represents your entire running server —
 // every route (like app.get, app.post) gets attached to this object.
-
+app.use(cors());
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY }); 
 // Creates an authenticated connection to Groq, using your secret key from .env.
 // Every time you write groq.chat.completions.create(...), you're using this connection.
