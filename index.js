@@ -95,8 +95,8 @@ async function getEvidence(claim) {
     query: claim,
     // The actual search query — here, we're searching for evidence about this specific claim.
 
-    max_results: 3
-    // Limits Tavily to sending back only the top 3 most relevant results,
+    max_results: 5
+    // Limits Tavily to sending back only the top 5 most relevant results,
     // so we don't get overwhelmed with data.
   });
 
@@ -122,14 +122,16 @@ async function getVerdict(claim, evidence) {
   // with a blank line between each source, so it reads clearly.
   // We need this because Tavily gives us structured DATA (objects),
   // but our next Groq prompt needs plain readable TEXT.
-
+  const today = new Date().toISOString().split('T')[0];
   const response = await groq.chat.completions.create({
     // Same idea as extractClaims — send a request to Groq, wait for the reply.
 
     messages: [
       {
         role: 'user',
-        content: `You are a fact-checker. Given a claim and evidence from real sources, determine a verdict.
+                content: `You are a fact-checker. Today's date is ${today}. Given a claim and evidence from real sources, determine a verdict.
+
+IMPORTANT: Evidence sources may be outdated. If a source describes a past status without confirming it's still current as of today, do not assume it's still true or false. If ambiguous, lean toward UNVERIFIABLE rather than confidently wrong.
 
 Claim: "${claim}"
 
