@@ -15,6 +15,8 @@ const axios = require('axios');
 // Imports axios — a generic tool for sending HTTP requests to any URL.
 // We use this for Tavily, since Tavily doesn't have its own official library like Groq does.
 
+const FirecrawlApp= require('@mendable/firecrawl-js').default;
+const firecrawl= new FirecrawlApp({apiKey: process.env.FIRECRAWL_API_KEY});
 const app = express();
 // Creates the actual Express application/server object.
 // From now on, "app" represents your entire running server —
@@ -160,6 +162,24 @@ Respond ONLY with a JSON object in this exact format, nothing else:
 }
 
 
+function isUrl(text) {
+  // Checks if the input looks like a web link (starts with http:// or https://).
+  // Returns true or false.
+  return /^https?:\/\/\S+$/.test(text.trim());
+}
+
+async function scrapeArticle(url) {
+  // Takes a URL, asks Firecrawl to visit that page and extract clean text from it.
+  const result = await firecrawl.scrapeUrl(url, {
+    formats: ['markdown']
+  });
+  return result.markdown;
+}
+
+
+
+
+
 /* ============================
    ROUTES
    These are the actual "doors" into your server —
@@ -183,6 +203,8 @@ app.post('/api/analyze', async (req, res) => {
   // This is the MAIN route — the real brain of Veristate.
   // "async" because this route will call several slow functions (Groq, Tavily) and must wait for them.
 
+  
+  
   const { text } = req.body;
   // Destructuring: req.body is the JSON data the frontend sent, e.g. { "text": "some paragraph" }.
   // This line pulls out just the "text" field into its own variable.
@@ -192,9 +214,26 @@ app.post('/api/analyze', async (req, res) => {
   // Prints the incoming text to your terminal — useful for debugging,
   // so you can see exactly what the server received while testing.
 
-  const claims = await extractClaims(text);
-  // Calls our first helper function: turns the raw text into an array of individual claims.
-  // "await" pauses here until extractClaims fully finishes and returns its array.
+  let contentToAnalyze = text;
+  // Starts as whatever the user sent. Uses "let" (not "const") because
+  // this value might get REPLACED below if it turns out to be a URL.
+
+  if (isUrl(text)) {
+    // Checks if the input looks like a link. If yes, run this block.
+    console.log('Detected a URL — scraping with Firecrawl...');
+    contentToAnalyze = await scrapeArticle(text);
+    // Overwrites contentToAnalyze with the actual scraped article text.
+    console.log('Scraped content length:', contentToAnalyze.length);
+  }
+  // If the input was NOT a URL, this whole block is skipped,
+  // and contentToAnalyze just stays equal to the original typed text.
+
+  const claims = await extractClaims(contentToAnalyze);
+  // Calls our first helper function — now using contentToAnalyze instead of text,
+  // so this works correctly whether the input was plain text OR a scraped article.
+
+
+
 
   const results = [];
   // Creates an empty array. We'll fill this with one verdict object per claim,

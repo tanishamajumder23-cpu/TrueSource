@@ -19,6 +19,7 @@
   },
   "homepage": "https://github.com/tanishamajumder23-cpu/Veristate#readme",
   "dependencies": {
+    "@mendable/firecrawl-js": "^4.38.0",
     "axios": "^1.19.0",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
