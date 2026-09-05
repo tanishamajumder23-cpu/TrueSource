@@ -86,28 +86,39 @@ Text: "${text}"`
 async function getEvidence(claim) {
   // Takes one input: "claim" — a single claim string (one item from the array above).
 
-  const tavilyResponse = await axios.post('https://api.tavily.com/search', {
-    // Sends a POST request to Tavily's search endpoint and waits for the reply.
-    // First argument = the URL we're sending to.
-    // Second argument = the data we're sending, described below.
+  try {
+    const tavilyResponse = await axios.post('https://api.tavily.com/search', {
+      // Sends a POST request to Tavily's search endpoint and waits for the reply.
+      // First argument = the URL we're sending to.
+      // Second argument = the data we're sending, described below.
 
-    api_key: process.env.TAVILY_API_KEY,
-    // Our secret Tavily key, proving to Tavily that this request is really from us.
+      api_key: process.env.TAVILY_API_KEY,
+      // Our secret Tavily key, proving to Tavily that this request is really from us.
 
-    query: claim,
-    // The actual search query — here, we're searching for evidence about this specific claim.
+      query: claim,
+      // The actual search query — here, we're searching for evidence about this specific claim.
 
-    max_results: 5
-    // Limits Tavily to sending back only the top 5 most relevant results,
-    // so we don't get overwhelmed with data.
-  });
+      max_results: 5
+      // Limits Tavily to sending back only the top 5 most relevant results,
+      // so we don't get overwhelmed with data.
+    });
 
-  return tavilyResponse.data.results;
-  // tavilyResponse is the full reply object (status codes, headers, etc — we don't need all of that).
-  // tavilyResponse.data is the actual content Tavily sent back.
-  // .results is specifically the array of search result objects
-  // (each with title, content, url, score) — this is our "evidence."
-  // We return just this array, since that's the only part we actually need.
+    return tavilyResponse.data.results;
+    // tavilyResponse is the full reply object (status codes, headers, etc — we don't need all of that).
+    // tavilyResponse.data is the actual content Tavily sent back.
+    // .results is specifically the array of search result objects
+    // (each with title, content, url, score) — this is our "evidence."
+    // We return just this array, since that's the only part we actually need.
+  } catch (error) {
+    // If Tavily is down, times out, or the network drops (e.g. ECONNRESET),
+    // axios throws instead of returning a response — and without this catch,
+    // that throw would bubble all the way up and crash the whole /api/analyze request.
+    console.log('Tavily request failed for claim:', claim, error.message);
+
+    return [];
+    // Return an empty evidence array instead of throwing, so this one claim
+    // just ends up with no evidence — the rest of the request keeps going.
+  }
 }
 
 
@@ -143,7 +154,7 @@ ${evidenceText}
 Respond ONLY with a JSON object in this exact format, nothing else:
 {
   "verdict": "TRUE" | "FALSE" | "MISLEADING" | "UNVERIFIABLE",
-  "confidence": 0-100,
+  "confidence": <a plain integer number between 0 and 100, e.g. 82 - NEVER spell it out as a word like "seventy">,
   "reasoning": "a 1-2 sentence explanation",
   "sources": ["url1", "url2"]
 }`
@@ -156,10 +167,20 @@ Respond ONLY with a JSON object in this exact format, nothing else:
     model: 'openai/gpt-oss-120b',
   });
 
-  return JSON.parse(response.choices[0].message.content);
+   try {
+    return JSON.parse(response.choices[0].message.content);
+  } catch (error) {
+    console.log('Failed to parse verdict JSON, using fallback:', error.message);
+    return {
+      verdict: "UNVERIFIABLE",
+      confidence: 50,
+      reasoning: "Could not generate a reliable verdict for this claim due to a formatting error.",
+      sources: []
+    };
+  }
+}
   // Same as before — convert Groq's text reply (a JSON-shaped string)
   // into a real JavaScript object we can actually use, then return it.
-}
 
 
 function isUrl(text) {
