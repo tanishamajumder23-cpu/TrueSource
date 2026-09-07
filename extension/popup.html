@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Veristate</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <header class="header">
+      <div class="brand">
+        <span class="brand__mark">◈</span>
+        Veristate
+      </div>
+      <button id="settings-toggle" class="icon-btn" title="Settings" aria-label="Settings">⚙</button>
+    </header>
+
+    <!-- Hidden until the gear is clicked: most people never need to change this. -->
+    <section id="settings" class="settings" hidden>
+      <label class="settings__label" for="api-url">Veristate API URL</label>
+      <input id="api-url" class="settings__input" type="url" placeholder="http://localhost:3000" />
+      <button id="save-settings" class="btn btn--ghost">Save</button>
+    </section>
+
+    <main class="main">
+      <div class="actions">
+        <button id="check-page" class="btn btn--primary">Fact-check this page</button>
+        <p class="hint">Or highlight any text on a page, right-click, and choose <b>Fact-check with Veristate</b>.</p>
+      </div>
+
+      <!-- One region, four states: idle, loading, results, error. Never blank. -->
+      <div id="status" class="status" hidden></div>
+      <div id="summary" class="summary" hidden></div>
+      <div id="results" class="results"></div>
+    </main>
+
+    <footer class="footer">Every verdict is grounded in retrieved evidence, never model memory.</footer>
+
+    <script src="popup.js"></script>
+  </body>
+</html>

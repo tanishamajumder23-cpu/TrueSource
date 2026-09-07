@@ -1,0 +1,10 @@
+/* The inline panel lives entirely inside a shadow root (see content.js), which
+   is what keeps the host page's CSS out of it. This file exists only to
+   neutralise the one thing shadow DOM cannot isolate: styles a page may target
+   at our host element itself. */
+
+#veristate-panel-host {
+  all: initial;
+  position: fixed !important;
+  z-index: 2147483647 !important;
+}
