@@ -204,7 +204,7 @@ async function* transcribeChunkStream(chunkSource) {
  * Cleans up its temporary directory when iteration finishes or is abandoned.
  */
 async function* fileChunkSource(videoPath, chunkSeconds) {
-  const workDir = fs.mkdtempSync(path.join(os.tmpdir(), 'veristate-audio-'));
+  const workDir = fs.mkdtempSync(path.join(os.tmpdir(), 'truthlens-audio-'));
 
   try {
     const segments = await splitAudioIntoSegments(videoPath, workDir, chunkSeconds);

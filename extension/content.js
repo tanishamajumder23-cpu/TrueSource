@@ -1,8 +1,8 @@
 /**
- * Veristate extension — content script.
+ * TruthLens extension — content script.
  *
  * Renders the inline verdict panel that appears when the user right-clicks a
- * selection and picks "Fact-check with Veristate".
+ * selection and picks "Fact-check with TruthLens".
  *
  * Two defensive decisions worth noting:
  *
@@ -16,7 +16,7 @@
  *     with textContent / createElement, so no page can be XSS'd through us.
  */
 
-const PANEL_ID = 'veristate-panel-host';
+const PANEL_ID = 'truthlens-panel-host';
 
 const VERDICT_STYLE = {
   TRUE: { label: 'True', color: '#22c55e', icon: '✓' },
@@ -62,7 +62,7 @@ function buildHeader(panel, subtitle) {
 
   const title = document.createElement('div');
   title.className = 'vs-title';
-  title.textContent = 'Veristate';
+  title.textContent = 'TruthLens';
 
   const close = document.createElement('button');
   close.className = 'vs-close';
@@ -205,16 +205,16 @@ function renderError(message) {
 
 chrome.runtime.onMessage.addListener((message) => {
   switch (message?.type) {
-    case 'VERISTATE_LOADING':
+    case 'TRUTHLENS_LOADING':
       renderLoading(message.query);
       break;
-    case 'VERISTATE_RESULTS':
+    case 'TRUTHLENS_RESULTS':
       renderResults(message);
       break;
-    case 'VERISTATE_ERROR':
+    case 'TRUTHLENS_ERROR':
       renderError(message.message);
       break;
-    case 'VERISTATE_GET_PAGE_TEXT':
+    case 'TRUTHLENS_GET_PAGE_TEXT':
       // The popup asks for the readable text of the page. Answering from the
       // content script means we get the rendered DOM, including anything the
       // site loaded with JavaScript.

@@ -44,7 +44,7 @@ export function EmptyState({ onPickExample }) {
       </div>
       <h3 className="state-card__title">Nothing checked yet</h3>
       <p className="state-card__body">
-        Paste a claim, drop in an article link, upload a screenshot or a video. Veristate breaks it into individual
+        Paste a claim, drop in an article link, upload a screenshot or a video. TruthLens breaks it into individual
         claims, searches the live web for real evidence, and gives each one a verdict you can trace back to a source.
       </p>
 

@@ -17,7 +17,7 @@ async function requestJson(path, options = {}) {
   } catch {
     // fetch only rejects on network-level failure, which almost always means
     // "the backend isn't running" during development. Say so plainly.
-    throw new Error(`Cannot reach the Veristate API at ${API_URL}. Is the backend running?`);
+    throw new Error(`Cannot reach the TruthLens API at ${API_URL}. Is the backend running?`);
   }
 
   const payload = await response.json().catch(() => ({}));
@@ -68,7 +68,7 @@ export async function analyzeImage(file, { signal } = {}) {
   try {
     response = await fetch(`${API_URL}/api/analyze-image`, { method: 'POST', body: form, signal });
   } catch {
-    throw new Error(`Cannot reach the Veristate API at ${API_URL}. Is the backend running?`);
+    throw new Error(`Cannot reach the TruthLens API at ${API_URL}. Is the backend running?`);
   }
 
   const payload = await response.json().catch(() => ({}));
@@ -145,7 +145,7 @@ export function analyzeVideoStream(file, { onEvent, onUploadProgress, signal } =
       resolve();
     });
 
-    xhr.addEventListener('error', () => reject(new Error(`Cannot reach the Veristate API at ${API_URL}.`)));
+    xhr.addEventListener('error', () => reject(new Error(`Cannot reach the TruthLens API at ${API_URL}.`)));
     xhr.addEventListener('abort', () => reject(new DOMException('Aborted', 'AbortError')));
 
     signal?.addEventListener('abort', () => xhr.abort());

@@ -3,7 +3,7 @@
  *
  * This is a deliberate product decision, not a shortcut. Fact-checking works
  * perfectly well without a database; history is a convenience on top. So if
- * Postgres is not installed, not running, or not configured, Veristate logs a
+ * Postgres is not installed, not running, or not configured, TruthLens logs a
  * warning, flips into "no persistence" mode and keeps serving verdicts.
  *
  * The alternative -- refusing to boot without a database -- would mean a judge

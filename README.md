@@ -1,8 +1,8 @@
-# Veristate
+# TruthLens
 
 **AI fact-checking grounded in live web evidence.**
 
-Submit text, a news link, a screenshot or a video. Veristate breaks it into individual factual claims, retrieves real evidence from the internet for each one, and returns a verdict — **TRUE / FALSE / MISLEADING / UNVERIFIABLE** — with a confidence score, plain-English reasoning, and clickable sources you can check yourself.
+Submit text, a news link, a screenshot or a video. TruthLens breaks it into individual factual claims, retrieves real evidence from the internet for each one, and returns a verdict — **TRUE / FALSE / MISLEADING / UNVERIFIABLE** — with a confidence score, plain-English reasoning, and clickable sources you can check yourself.
 
 ```
 ┌──────────┐   ┌───────────┐   ┌──────────────┐   ┌─────────────┐
@@ -35,7 +35,7 @@ Submit text, a news link, a screenshot or a video. Veristate breaks it into indi
 
 ## The core design decision: RAG
 
-**Veristate never asks the AI "is this true?"**
+**TruthLens never asks the AI "is this true?"**
 
 That single rule is the reason this product can be trusted, and everything in the codebase follows from it.
 
@@ -49,7 +49,7 @@ The obvious way to build a fact-checker is to hand a claim to a large language m
 
 Both failure modes produce the *same output shape* as a correct answer: fluent, confident, plausible. A user cannot tell them apart. For a fact-checking product, that is disqualifying.
 
-### What Veristate does instead
+### What TruthLens does instead
 
 **Retrieval-Augmented Generation.** Fetch real, current documents from the live web *first*, then let the model reason **only** over those documents.
 
@@ -135,7 +135,7 @@ The UI shows which provider answered (`via Tavily`, `via DuckDuckGo (fallback)`)
 ## Architecture
 
 ```
-veristate/
+truthlens/
 │
 ├── backend/              Node + Express API  ── the pipeline lives here
 ├── frontend/             React + Vite web app
@@ -212,7 +212,7 @@ Sources are rows rather than a JSON blob, which makes questions like *"which dom
 
 ```bash
 git clone <your-repo-url>
-cd veristate
+cd truthlens
 npm install
 cp .env.example .env      # add your GROQ_API_KEY at minimum
 npm run dev               # API on http://localhost:3000
@@ -290,7 +290,7 @@ VITE_API_URL=https://your-api-host
 
 ## Setup: database (optional)
 
-Without PostgreSQL, Veristate runs in **no-persistence mode**: fact-checking is unaffected, and the History view explains why it is empty. This is deliberate — refusing to boot without a database would mean anyone cloning the repo sees a stack trace instead of a product.
+Without PostgreSQL, TruthLens runs in **no-persistence mode**: fact-checking is unaffected, and the History view explains why it is empty. This is deliberate — refusing to boot without a database would mean anyone cloning the repo sees a stack trace instead of a product.
 
 To enable history:
 
@@ -327,7 +327,7 @@ The bot accepts text, links, images and text documents in chat, and replies with
 
 4. Message your bot. Send `/start` for the intro, then paste any claim.
 
-The bot uses **long polling**, so there is no webhook, no public URL and no tunnel to set up. If the API is on another host, set `VERISTATE_API_URL`.
+The bot uses **long polling**, so there is no webhook, no public URL and no tunnel to set up. If the API is on another host, set `TRUTHLENS_API_URL`.
 
 ---
 
@@ -342,8 +342,8 @@ Fact-check the page you are reading, or highlight any text, right-click, and get
 
 **Two ways to use it:**
 
-- **Whole page** — click the Veristate icon, then *Fact-check this page*. The content script extracts the readable article text and runs it through the pipeline.
-- **Any selection** — highlight text on any page, right-click, choose *Fact-check "…" with Veristate*. A panel slides in with the verdict cards.
+- **Whole page** — click the TruthLens icon, then *Fact-check this page*. The content script extracts the readable article text and runs it through the pipeline.
+- **Any selection** — highlight text on any page, right-click, choose *Fact-check "…" with TruthLens*. A panel slides in with the verdict cards.
 
 If your API is not on `localhost:3000`, click the gear in the popup and set the URL. (You will also need to add that origin to `host_permissions` in `manifest.json`.)
 
@@ -471,7 +471,7 @@ On the frontend, every path has a designed state: an empty state with runnable e
 ## Project structure
 
 ```
-veristate/
+truthlens/
 ├── backend/src/
 │   ├── config/env.js
 │   ├── lib/groqClient.js
@@ -505,7 +505,7 @@ veristate/
 
 ## Troubleshooting
 
-**"Cannot reach the Veristate API"** — the backend is not running, or `VITE_API_URL` points somewhere else. Check <http://localhost:3000>.
+**"Cannot reach the TruthLens API"** — the backend is not running, or `VITE_API_URL` points somewhere else. Check <http://localhost:3000>.
 
 **Every verdict comes back UNVERIFIABLE** — evidence retrieval is failing. Check the server log: you should see which provider answered. If all three fail, check your network and `TAVILY_API_KEY`.
 

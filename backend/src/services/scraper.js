@@ -8,7 +8,7 @@
  * Firecrawl renders the page (including JS-heavy sites) and returns clean
  * markdown, which is exactly the signal-dense input the claim extractor wants.
  *
- * As with everything else in Veristate, failure is expected and handled: a
+ * As with everything else in TruthLens, failure is expected and handled: a
  * paywalled, blocked or dead URL produces a clear, user-facing error rather than
  * an unhandled rejection.
  */

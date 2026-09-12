@@ -1,5 +1,5 @@
 /**
- * The Veristate pipeline -- the single place where the RAG flow is assembled.
+ * The TruthLens pipeline -- the single place where the RAG flow is assembled.
  *
  *      text / url / image / video
  *                 |

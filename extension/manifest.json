@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "Veristate — Fact-check anything",
+  "name": "TruthLens — Fact-check anything",
   "version": "2.0.0",
   "description": "Fact-check the page you're reading, or highlight any text and check it inline. Verdicts grounded in live web evidence.",
 
@@ -21,7 +21,7 @@
 
   "action": {
     "default_popup": "popup.html",
-    "default_title": "Fact-check this page with Veristate",
+    "default_title": "Fact-check this page with TruthLens",
     "default_icon": {
       "16": "icons/icon16.png",
       "48": "icons/icon48.png",

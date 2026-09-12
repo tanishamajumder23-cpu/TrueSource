@@ -1,5 +1,5 @@
 /**
- * Veristate extension — popup.
+ * TruthLens extension — popup.
  *
  * "Fact-check this page": grab the readable text from the active tab, hand it
  * to the background worker (which owns API access), and render the verdicts.
@@ -155,7 +155,7 @@ els.checkPage.addEventListener('click', async () => {
     // exactly the case we want to explain rather than fail silently on.
     let pageText;
     try {
-      const response = await chrome.tabs.sendMessage(tab.id, { type: 'VERISTATE_GET_PAGE_TEXT' });
+      const response = await chrome.tabs.sendMessage(tab.id, { type: 'TRUTHLENS_GET_PAGE_TEXT' });
       pageText = response?.text;
     } catch {
       throw new Error('This page cannot be read (browser pages and the Web Store are off-limits).');
@@ -167,7 +167,7 @@ els.checkPage.addEventListener('click', async () => {
 
     setStatus('Extracting claims and retrieving evidence…', { loading: true });
 
-    const response = await chrome.runtime.sendMessage({ type: 'VERISTATE_ANALYZE', text: pageText });
+    const response = await chrome.runtime.sendMessage({ type: 'TRUTHLENS_ANALYZE', text: pageText });
 
     if (!response?.ok) throw new Error(response?.error || 'Analysis failed.');
 
@@ -201,6 +201,6 @@ els.saveSettings.addEventListener('click', async () => {
 });
 
 // Prefill the settings field with whatever is currently configured.
-chrome.runtime.sendMessage({ type: 'VERISTATE_GET_API_URL' }).then((response) => {
+chrome.runtime.sendMessage({ type: 'TRUTHLENS_GET_API_URL' }).then((response) => {
   if (response?.apiUrl) els.apiUrl.value = response.apiUrl;
 });

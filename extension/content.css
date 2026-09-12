@@ -3,7 +3,7 @@
    neutralise the one thing shadow DOM cannot isolate: styles a page may target
    at our host element itself. */
 
-#veristate-panel-host {
+#truthlens-panel-host {
   all: initial;
   position: fixed !important;
   z-index: 2147483647 !important;

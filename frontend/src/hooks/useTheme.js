@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 
-const STORAGE_KEY = 'veristate:theme';
+const STORAGE_KEY = 'truthlens:theme';
 
 /**
  * Dark/light theme, persisted to localStorage.

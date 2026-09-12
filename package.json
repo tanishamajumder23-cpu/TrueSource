@@ -1,7 +1,7 @@
 {
-  "name": "veristate",
+  "name": "truthlens",
   "version": "1.0.0",
-  "description": "Veristate - an AI fact-checking platform built on retrieval-augmented generation.",
+  "description": "TruthLens - an AI fact-checking platform built on retrieval-augmented generation.",
   "main": "backend/src/server.js",
   "scripts": {
     "start": "node backend/src/server.js",
@@ -13,7 +13,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/tanishamajumder23-cpu/Veristate.git"
+    "url": "git+https://github.com/tanishamajumder23-cpu/TruthLens.git"
   },
   "keywords": [
     "fact-checking",
@@ -26,9 +26,9 @@
   "license": "MIT",
   "type": "commonjs",
   "bugs": {
-    "url": "https://github.com/tanishamajumder23-cpu/Veristate/issues"
+    "url": "https://github.com/tanishamajumder23-cpu/TruthLens/issues"
   },
-  "homepage": "https://github.com/tanishamajumder23-cpu/Veristate#readme",
+  "homepage": "https://github.com/tanishamajumder23-cpu/TruthLens#readme",
   "dependencies": {
     "@mendable/firecrawl-js": "^4.38.0",
     "axios": "^1.19.0",
