@@ -149,7 +149,7 @@ async function searchWikipedia(claim) {
   const common = {
     timeout: 10000,
     // Wikipedia asks API clients to identify themselves.
-    headers: { 'User-Agent': 'TruthLens/2.0 (fact-checking research project)' },
+    headers: { 'User-Agent': 'TruthSource/2.0 (fact-checking research project)' },
   };
 
   // Step 1: which articles are relevant to this claim?

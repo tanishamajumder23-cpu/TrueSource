@@ -5,7 +5,7 @@
  * shape). This module is the ONLY place that reads process.env, so the rest of the
  * codebase depends on a typed, validated object instead of scattered env lookups.
  *
- * Design note: nothing here throws. TruthLens is built to degrade gracefully —
+ * Design note: nothing here throws. TruthSource is built to degrade gracefully —
  * a missing Firecrawl key should disable URL scraping, not take the whole server
  * down. Callers check the `features` flags before using an optional integration.
  */
@@ -55,7 +55,7 @@ const config = {
     port: Number(process.env.PGPORT) || 5432,
     user: process.env.PGUSER || 'postgres',
     password: process.env.PGPASSWORD,
-    name: process.env.PGDATABASE || 'truthlens',
+    name: process.env.PGDATABASE || 'truthsource',
     ssl: process.env.PGSSL === 'true',
   },
 
@@ -80,7 +80,7 @@ const config = {
   telegram: {
     token: process.env.TELEGRAM_BOT_TOKEN,
     // The bot talks to the same HTTP API the web app uses — one pipeline, many surfaces.
-    apiBaseUrl: process.env.TRUTHLENS_API_URL || 'http://localhost:3000',
+    apiBaseUrl: process.env.TRUTHSOURCE_API_URL || 'http://localhost:3000',
   },
 };
 

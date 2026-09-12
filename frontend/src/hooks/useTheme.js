@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 
-const STORAGE_KEY = 'truthlens:theme';
+const STORAGE_KEY = 'truthsource:theme';
 
 /**
  * Dark/light theme, persisted to localStorage.

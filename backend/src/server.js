@@ -1,5 +1,5 @@
 /**
- * TruthLens API server.
+ * TruthSource API server.
  *
  * Composition root: wires middleware, routes and the database together and
  * starts listening. All real work lives in services/; this file is deliberately
@@ -53,7 +53,7 @@ app.use((req, res, next) => {
  */
 app.get('/', (req, res) => {
   res.json({
-    name: 'TruthLens API',
+    name: 'TruthSource API',
     status: 'ok',
     version: '2.0.0',
     time: new Date().toISOString(),
@@ -112,7 +112,7 @@ async function start() {
   await initDatabase();
 
   const server = app.listen(config.port, () => {
-    log.info(`TruthLens API listening on http://localhost:${config.port}`);
+    log.info(`TruthSource API listening on http://localhost:${config.port}`);
     if (!config.features.groq) log.warn('GROQ_API_KEY missing - analysis will fail until it is set.');
     if (!config.features.tavily) log.warn('TAVILY_API_KEY missing - evidence retrieval will use DuckDuckGo only.');
     if (!config.features.firecrawl) log.warn('FIRECRAWL_API_KEY missing - URL scraping is disabled.');

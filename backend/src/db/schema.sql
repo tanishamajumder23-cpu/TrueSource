@@ -1,5 +1,5 @@
 -- ============================================================================
---  TruthLens schema
+--  TruthSource schema
 --
 --  Normalised into four tables that mirror the pipeline exactly:
 --

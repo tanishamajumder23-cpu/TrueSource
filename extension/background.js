@@ -1,9 +1,9 @@
 /**
- * TruthLens extension — background service worker (Manifest V3).
+ * TruthSource extension — background service worker (Manifest V3).
  *
  * Two responsibilities:
  *   1. Own the right-click "Fact-check selection" menu item.
- *   2. Be the ONLY thing that talks to the TruthLens API.
+ *   2. Be the ONLY thing that talks to the TruthSource API.
  *
  * Point 2 matters. A content script runs in the page's origin, so its fetches
  * are subject to that page's CORS policy and its Content-Security-Policy — on a
@@ -37,30 +37,30 @@ async function getApiUrl() {
 // worker wake-up would throw a duplicate-id error.
 chrome.runtime.onInstalled.addListener(() => {
   chrome.contextMenus.create({
-    id: 'truthlens-check-selection',
-    title: 'Fact-check "%s" with TruthLens',
+    id: 'truthsource-check-selection',
+    title: 'Fact-check "%s" with TruthSource',
     contexts: ['selection'],
   });
 });
 
 chrome.contextMenus.onClicked.addListener(async (info, tab) => {
-  if (info.menuItemId !== 'truthlens-check-selection' || !tab?.id) return;
+  if (info.menuItemId !== 'truthsource-check-selection' || !tab?.id) return;
 
   const text = (info.selectionText || '').trim();
   if (text.length < 10) {
-    notifyTab(tab.id, { type: 'TRUTHLENS_ERROR', message: 'Select a bit more text — at least a full sentence.' });
+    notifyTab(tab.id, { type: 'TRUTHSOURCE_ERROR', message: 'Select a bit more text — at least a full sentence.' });
     return;
   }
 
   // Show the panel immediately in its loading state, then fill it in. Waiting
   // for the API before showing anything would look like the click did nothing.
-  notifyTab(tab.id, { type: 'TRUTHLENS_LOADING', query: text });
+  notifyTab(tab.id, { type: 'TRUTHSOURCE_LOADING', query: text });
 
   try {
     const results = await analyze(text);
-    notifyTab(tab.id, { type: 'TRUTHLENS_RESULTS', ...results });
+    notifyTab(tab.id, { type: 'TRUTHSOURCE_RESULTS', ...results });
   } catch (error) {
-    notifyTab(tab.id, { type: 'TRUTHLENS_ERROR', message: error.message });
+    notifyTab(tab.id, { type: 'TRUTHSOURCE_ERROR', message: error.message });
   }
 });
 
@@ -95,7 +95,7 @@ async function analyze(text) {
       body: JSON.stringify({ text, surface: 'extension' }),
     });
   } catch {
-    throw new Error(`Can't reach TruthLens at ${apiUrl}. Is the backend running?`);
+    throw new Error(`Can't reach TruthSource at ${apiUrl}. Is the backend running?`);
   }
 
   const payload = await response.json().catch(() => ({}));
@@ -109,7 +109,7 @@ async function analyze(text) {
 // --------------------------------------------------------------------------
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  if (message?.type === 'TRUTHLENS_ANALYZE') {
+  if (message?.type === 'TRUTHSOURCE_ANALYZE') {
     analyze(message.text)
       .then((data) => sendResponse({ ok: true, ...data }))
       .catch((error) => sendResponse({ ok: false, error: error.message }));
@@ -119,7 +119,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     return true;
   }
 
-  if (message?.type === 'TRUTHLENS_GET_API_URL') {
+  if (message?.type === 'TRUTHSOURCE_GET_API_URL') {
     getApiUrl().then((apiUrl) => sendResponse({ apiUrl }));
     return true;
   }

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * TruthLens Telegram bot.
+ * TruthSource Telegram bot.
  *
  * ── Why this is a separate process that talks HTTP ───────────────────────
  * The bot does NOT import the pipeline directly. It calls the same public API
@@ -143,7 +143,7 @@ async function analyzeAndReply(chatId, text) {
     const message =
       error.response?.data?.error ||
       (error.code === 'ECONNREFUSED'
-        ? `I can't reach the TruthLens API at ${API}. Is the backend running?`
+        ? `I can't reach the TruthSource API at ${API}. Is the backend running?`
         : 'Something went wrong while checking that. Please try again.');
 
     await bot.sendMessage(chatId, `⚠️ ${message}`).catch(() => {});
@@ -160,7 +160,7 @@ bot.onText(/^\/start/, (msg) => {
   bot.sendMessage(
     msg.chat.id,
     [
-      '*TruthLens* — fact\\-check anything, right here in chat\\.',
+      '*TruthSource* — fact\\-check anything, right here in chat\\.',
       '',
       'Send me:',
       '• any *text* or forwarded message',
@@ -274,5 +274,5 @@ process.on('unhandledRejection', (reason) => {
   log.error('Unhandled rejection', reason instanceof Error ? reason.message : reason);
 });
 
-log.info(`TruthLens Telegram bot is running. Talking to the API at ${API}`);
+log.info(`TruthSource Telegram bot is running. Talking to the API at ${API}`);
 log.info('Message your bot on Telegram to try it.');

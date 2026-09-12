@@ -1,5 +1,5 @@
 /**
- * The TruthLens pipeline -- the single place where the RAG flow is assembled.
+ * The TruthSource pipeline -- the single place where the RAG flow is assembled.
  *
  *      text / url / image / video
  *                 |

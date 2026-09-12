@@ -1,8 +1,8 @@
 /**
- * TruthLens extension — content script.
+ * TruthSource extension — content script.
  *
  * Renders the inline verdict panel that appears when the user right-clicks a
- * selection and picks "Fact-check with TruthLens".
+ * selection and picks "Fact-check with TruthSource".
  *
  * Two defensive decisions worth noting:
  *
@@ -16,7 +16,7 @@
  *     with textContent / createElement, so no page can be XSS'd through us.
  */
 
-const PANEL_ID = 'truthlens-panel-host';
+const PANEL_ID = 'truthsource-panel-host';
 
 const VERDICT_STYLE = {
   TRUE: { label: 'True', color: '#22c55e', icon: '✓' },
@@ -62,7 +62,7 @@ function buildHeader(panel, subtitle) {
 
   const title = document.createElement('div');
   title.className = 'vs-title';
-  title.textContent = 'TruthLens';
+  title.textContent = 'TruthSource';
 
   const close = document.createElement('button');
   close.className = 'vs-close';
@@ -205,16 +205,16 @@ function renderError(message) {
 
 chrome.runtime.onMessage.addListener((message) => {
   switch (message?.type) {
-    case 'TRUTHLENS_LOADING':
+    case 'TRUTHSOURCE_LOADING':
       renderLoading(message.query);
       break;
-    case 'TRUTHLENS_RESULTS':
+    case 'TRUTHSOURCE_RESULTS':
       renderResults(message);
       break;
-    case 'TRUTHLENS_ERROR':
+    case 'TRUTHSOURCE_ERROR':
       renderError(message.message);
       break;
-    case 'TRUTHLENS_GET_PAGE_TEXT':
+    case 'TRUTHSOURCE_GET_PAGE_TEXT':
       // The popup asks for the readable text of the page. Answering from the
       // content script means we get the rendered DOM, including anything the
       // site loaded with JavaScript.

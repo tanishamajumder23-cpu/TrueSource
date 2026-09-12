@@ -8,7 +8,7 @@
  *
  * Also creates the database itself if it does not exist yet, by connecting to
  * the default `postgres` database first. That removes the single most common
- * setup failure ("database truthlens does not exist").
+ * setup failure ("database truthsource does not exist").
  */
 
 const fs = require('fs');
@@ -77,7 +77,7 @@ async function applySchema(dbName) {
 
 async function main() {
   const dbName = targetDatabaseName();
-  console.log(`Running TruthLens migrations against "${dbName}"...`);
+  console.log(`Running TruthSource migrations against "${dbName}"...`);
 
   try {
     await ensureDatabaseExists(dbName);
@@ -95,7 +95,7 @@ async function main() {
     console.error(
       '\nCheck that PostgreSQL is running and that your .env credentials are correct\n' +
         '(DATABASE_URL, or PGHOST / PGPORT / PGUSER / PGPASSWORD / PGDATABASE).\n' +
-        'TruthLens still runs without a database - you just will not get history.',
+        'TruthSource still runs without a database - you just will not get history.',
     );
     process.exitCode = 1;
   }

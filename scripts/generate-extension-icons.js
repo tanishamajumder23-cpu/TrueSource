@@ -6,7 +6,7 @@
  * needs no extra dependency just to produce three small icons. Run it with:
  *   node scripts/generate-extension-icons.js
  *
- * Draws the TruthLens mark: a rounded indigo-to-violet square with a white
+ * Draws the TruthSource mark: a rounded indigo-to-violet square with a white
  * check, matching the web app's favicon and header logo.
  */
 

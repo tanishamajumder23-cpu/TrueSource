@@ -15,7 +15,7 @@ import { useAnalysis } from './hooks/useAnalysis';
 import { useTheme } from './hooks/useTheme';
 
 /**
- * TruthLens — application shell.
+ * TruthSource — application shell.
  *
  * Two views (Check / History), four input modes, one streaming result feed.
  * All analysis state lives in the useAnalysis hook; this component is layout
@@ -82,7 +82,7 @@ export default function App() {
             <span className="brand__mark">
               <ShieldCheckIcon width={16} height={16} color="#fff" style={{ color: '#fff' }} />
             </span>
-            TruthLens
+            TruthSource
           </div>
 
           <div className="header__actions">
@@ -134,7 +134,7 @@ export default function App() {
                 Fact-check <em>anything</em>.
               </h1>
               <p className="hero__tagline">
-                Text, links, screenshots or video — TruthLens splits it into individual claims, retrieves real
+                Text, links, screenshots or video — TruthSource splits it into individual claims, retrieves real
                 evidence from the web, and shows you the verdict behind every one.
               </p>
             </section>
@@ -244,7 +244,7 @@ export default function App() {
       {/* ---------------------------------------------------------------- */}
       <footer className="footer">
         <div className="container footer__inner">
-          <span>TruthLens · verdicts are grounded in retrieved evidence, never model memory.</span>
+          <span>TruthSource · verdicts are grounded in retrieved evidence, never model memory.</span>
           <span className="footer__pipeline">
             <span className="footer__step">extract</span>→<span className="footer__step">retrieve</span>→
             <span className="footer__step">reason</span>
